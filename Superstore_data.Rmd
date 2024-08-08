@@ -1,0 +1,98 @@
+---
+title: "Script using Superstore sample data"
+author: "Monika Aulich-Olszewska"
+date: "08-08-2024"
+---
+
+This is an example script to show my R skills.
+Used data is from Kaggler website.
+
+On the first part of the script used libraries are written. To install libraries, use command install.packages("library_name")
+```{r}
+library(ggplot2)
+library(VGAM) 
+
+```
+
+Next step is to read the data. It is important to choose right path to the file.
+
+```{r}
+csv_file <- read.csv("/Users/monia/Desktop/R/training/Sample-Superstore.csv", header = TRUE)
+df <- data.frame(csv_file)
+
+#to check if data is loaded one can use head() function
+head(df)
+df
+```
+
+Next step is to choose interesting data and what to do with them.
+At first I want to seew what product is the most bought
+
+```{r}
+ggplot(df, aes(x=Product.ID, y=Row.ID)) + geom_bar(stat = "identity", color="lightpink") + labs(x="Product ID",y="Number of products", title="Bar plot with numbers of sold products")
+
+
+```
+As we can see, this plot won't tell us much. Let's try wider cathegory - Segment.
+
+```{r}
+ggplot(df, aes(x=Segment, y=Row.ID)) + geom_bar(stat = "identity", color="lightblue") + labs(x="Cathegory name",y="Number of sold products in segment", title="Bar plot with numbers of sold products")
+
+```
+So right now one can see, that the biggest group in Superstore is Consumer group. Let's see what info we can get from Home Office data.
+
+First step here is to get data from Home office group only.
+
+```{r}
+df_ho <- df[df$Segment=="Home Office",]
+head(df_ho)
+print(paste("Number of sold products for Home Office Group is",nrow(df_ho)))
+```
+
+Now group is much smaller, so it is easier to find interesting data.
+```{r}
+ggplot(df_ho, aes(x=Ship.Mode, y=Row.ID)) + geom_bar(stat = "identity", color="lightpink") + labs(x="Product ID",y="Number of products", title="Bar plot with chosen ship mode")
+
+```
+As we can see the most used ship mode is Standard Class.
+I would like to see if there is a correlation between used ship mode and product category. 
+I used easy function cor()
+```{r}
+df_corr <- data.frame(df_ho$Ship.Mode,df_ho$Category)
+colnames(df_corr) <- c("Ship.Mode","Category")
+
+#only numeric variables can be used to computate correlation
+df_corr$Ship_num <- as.numeric(as.factor(df_corr$Ship.Mode))
+df_corr$Categ_num <- as.numeric(as.factor(df_corr$Category))
+
+cor_ship_cat <- cor(df_corr$Ship_num,df_corr$Categ_num)
+
+print(paste("Correlation is", round(cor_ship_cat,3)))
+
+```
+The correlation is very close to 0, so one can say that there is no correlation between used ship mode and product category.
+
+
+What interesting is for me, I would also like to see, how many orders were in what year in chosen group.
+At first I need to change data format
+```{r}
+df_ho$newdate <- strptime(as.character(df_ho$Order.Date), "%m/%d/%Y")
+df_ho$Date <- format(df_ho$newdate, "%Y-%m-%d")
+                          
+splitted_data <- split(df_ho, format(as.Date(df_ho$Date,format="%Y-%m-%d"), format = "%Y"))
+
+df_dates <- data.frame()
+for(i in 1:length(splitted_data)){
+  data <- splitted_data[[i]]
+  year <- format(as.Date(data$Date[1], format="%Y-%m-%d"),"%Y")
+  print(paste("In year",year[1],"there was",nrow(data),"solds"))
+  line <- c(year,nrow(data))
+  df_dates <- rbind(df_dates,line)
+}
+colnames(df_dates) <- c("Year","Solds")
+#df_dates$Year <- sapply(df_dates$Year,as.numeric)
+
+ggplot(data=df_dates, aes(x=Year, y=Solds, group=1)) + geom_line(color="pink")+ geom_point() + labs(x="Years",y="Number of sold products", title="Plot with number of sold products per year")
+
+```
+As we can see, every year there is more sold products in Home Office category.
