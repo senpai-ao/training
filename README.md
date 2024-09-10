@@ -7,6 +7,7 @@ Repozytorium to prezentuje część moich umiejętnośći programistycznych, kt�
 Skrypty pisane w językach:
 * R
 * Python
+
 Raport napisany za pomocą LaTeX'a
 
 ## Co znajduje się w podfolderach? 
