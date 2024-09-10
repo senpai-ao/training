@@ -24,6 +24,4 @@ W folderze project_final znajdują się:
 
 # Jak można się ze mną skontaktować?
 
-Za pomocą maila - monika.aulich.olszewska@gmail.com
-Poprzez napisanie tutaj na GitHubie
-:)
+Za pomocą maila - monika.aulich.olszewska@gmail.com lub poprzez napisanie tutaj na GitHubie
